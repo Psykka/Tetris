@@ -5,12 +5,19 @@ Simple tetris game written in C++ using SDL2.
 ## Build
 To build the game you need C/C++ compiler and XMake. To install XMake run:
 
+Unix based systems
 ```bash
 # with curl
 curl -fsSL https://xmake.io/shget.text | bash
 
 # with wget
 wget https://xmake.io/shget.text -O - | bash
+```
+
+Windows systems
+```powershell
+# with powershell
+Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
 ```
 
 Then run:
