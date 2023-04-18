@@ -1,0 +1,3 @@
+sourceFiles += files([
+    'main.c'
+])
