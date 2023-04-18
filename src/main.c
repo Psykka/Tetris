@@ -244,18 +244,19 @@ int main(int argc, char **argv)
         return 3;
     }
 
-    window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0);
+    window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, 0);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
     unsigned int a = SDL_GetTicks();
     unsigned int b = SDL_GetTicks();
     double delta = 0;
+    int speed = 2;
 
     game_t *game = new_game(NULL);
 
     while (running)
     {
-        int speed = 2;
+        speed = 2;
         a = SDL_GetTicks();
         delta = a - b;
 

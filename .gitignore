@@ -4,3 +4,7 @@ build/
 # editor
 .vscode/*
 !.vscode/tasks.json
+
+# meson cache
+subprojects/*
+!subprojects/*.wrap
