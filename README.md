@@ -15,7 +15,7 @@ $ pip install meson ninja
 Build project:
 ```
 # create build folder for meson
-$ meson builddir
+$ meson build
 
 # compile project
 $ meson compile -C build
