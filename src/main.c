@@ -1,6 +1,7 @@
-#include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "SDL.h"
 
 #define PIXEL 30
 #define WIDTH PIXEL * 10
