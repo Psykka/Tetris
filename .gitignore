@@ -3,3 +3,4 @@ build/
 
 # editor
 .vscode/*
+!.vscode/tasks.json

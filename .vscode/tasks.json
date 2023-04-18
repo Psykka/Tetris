@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "meson compile -C build",
+            "group": "build"
+        },
+        {
+            "label": "Run",
+            "type": "process",
+            "command": "./build/tetris",
+            "windows": {
+                "command": ".\\build\\tetris.exe"
+            },
+            "group": "build",
+            "dependsOn": [
+                "Build"
+            ]
+        },
+        {
+            "label": "Build and Run",
+            "group": "build",
+            "dependsOn": [
+                "Run"
+            ]
+        }
+    ]
+}
