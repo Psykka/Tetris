@@ -3,41 +3,33 @@
 Simple tetris game written in C++ using SDL2.
 
 ## Build
-To build the game you need C/C++ compiler and XMake. To install XMake run:
+Requires:
+ - Python and pip for installing the building tools
+ - Any C compiler (gcc, clang, etc.)
 
-Unix based systems
-```bash
-# with curl
-curl -fsSL https://xmake.io/shget.text | bash
-
-# with wget
-wget https://xmake.io/shget.text -O - | bash
+Install meson and ninja build system:
+```
+$ pip install meson ninja
 ```
 
-Windows systems
-```powershell
-# with powershell
-Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
+Build project:
 ```
+# create build folder for meson
+$ meson builddir
 
-Then run:
-
-```bash
-# to build
-xmake build
+# compile project
+$ meson compile -C build
 ```
 
 ## Run
-To run the game run:
-
-```bash
-# to run
-xmake run
+```
+$ ./build/tetris
 ```
 
 ## Controls
 - `Left` and `Right` arrow keys to move the piece.
-- `Up` arrow key to rotate the piece.
+- `X` to rotate the piece clockwise.
+- `Z` to rotate the piece counter-clockwise.
 - `Down` arrow key to move the piece faster.
 - `Space` to drop the piece.
 - `Esc` to quit the game.
