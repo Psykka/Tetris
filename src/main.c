@@ -6,7 +6,11 @@
 #define WIDTH PIXEL * 10
 #define HEIGHT PIXEL * 20
 
-enum piece_type {
+#define ROTATION_TESTS 5
+#define ORIENTATIONS 4
+
+enum piece_type
+{
     PIECE_I = 0,
     PIECE_J,
     PIECE_L,
@@ -16,86 +20,127 @@ enum piece_type {
     PIECE_Z,
 };
 
-typedef struct {
-    int points[4][2];
+enum rotation_direction
+{
+    CLOCKWISE = 0,
+    COUNTER_CLOCKWISE,
+};
+
+typedef struct point
+{
+    int x;
+    int y;
+} point_t;
+
+static point_t offset_I[ORIENTATIONS][ROTATION_TESTS] = {
+    {{0, 0}, {-2, 0}, {1, 0}, {-2, -1}, {1, 2}},
+    {{0, 0}, {-1, 0}, {2, 0}, {-1, 2}, {2, -1}},
+    {{0, 0}, {2, 0}, {-1, 0}, {2, 1}, {-1, -2}},
+    {{0, 0}, {1, 0}, {-2, 0}, {1, -2}, {-2, 1}},
+};
+
+static point_t offset_JLSTZ[ORIENTATIONS][ROTATION_TESTS] = {
+    {{0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2}},
+    {{0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}},
+    {{0, 0}, {1, 0}, {1, 1}, {0, -2}, {1, -2}},
+    {{0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2}},
+};
+
+static point_t offset_O[ORIENTATIONS][ROTATION_TESTS] = {
+    {{0, 0}},
+    {{0, -1}},
+    {{0, -1}},
+    {{0, -1}}};
+
+typedef struct
+{
+    int tiles[4][4];
     int color;
 } piece_format_t;
 
-typedef struct {
-    int x;
-    int y;
+typedef struct
+{
     int type;
     int rotation;
+    point_t *position;
     piece_format_t *format;
 } piece_t;
 
 piece_format_t piece_formats[] = {
-    { // PIECE_I
-        .points = {
-            {1, 0},
-            {1, 0},
-            {1, 0},
-            {1, 0},
+    {
+        // PIECE_I
+        .tiles = {
+            {0, 1, 0, 0},
+            {0, 1, 0, 0},
+            {0, 1, 0, 0},
+            {0, 1, 0, 0},
         },
         .color = 0x00ffff,
     },
-    { // PIECE_J
-        .points = {
-            {0, 1},
-            {0, 1},
-            {1, 1},
-            {0, 0},
+    {
+        // PIECE_J
+        .tiles = {
+            {0, 0, 1, 0},
+            {1, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
         },
         .color = 0x0000ff,
     },
-    { // PIECE_L
-        .points = {
-            {1, 0},
-            {1, 0},
-            {1, 1},
-            {0, 0},
+    {
+        // PIECE_L
+        .tiles = {
+            {1, 0, 0, 0},
+            {1, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
         },
         .color = 0xff8100,
     },
-    { // PIECE_O
-        .points = {
-            {1, 1},
-            {1, 1},
-            {0, 0},
-            {0, 0},
+    {
+        // PIECE_O
+        .tiles = {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
         },
         .color = 0xffff00,
     },
-    { // PIECE_S
-        .points = {
-            {0, 1},
-            {1, 1},
-            {1, 0},
-            {0, 0},
+    {
+        // PIECE_S
+        .tiles = {
+            {0, 1, 1, 0},
+            {1, 1, 0, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
         },
         .color = 0x00ff00,
     },
-    { // PIECE_T
-        .points = {
-            {0, 1},
-            {1, 1},
-            {0, 1},
-            {0, 0},
+    {
+        // PIECE_T
+        .tiles = {
+            {0, 1, 0, 0},
+            {1, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
         },
         .color = 0xff00ff,
     },
-    { // PIECE_Z
-        .points = {
-            {1, 0},
-            {1, 1},
-            {0, 1},
-            {0, 0},
+    {
+        // PIECE_Z
+        .tiles = {
+            {1, 1, 0, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0},
         },
         .color = 0xff0000,
     },
 };
 
-typedef struct {
+typedef struct
+{
     int score;
     int piece_count;
     int board;
@@ -120,12 +165,13 @@ void draw_pixel(SDL_Renderer *renderer, int x, int y, int color)
 piece_t *create_piece()
 {
     piece_t *piece = malloc(sizeof(piece_t));
+    piece->position = malloc(sizeof(point_t));
 
     srand(time(0));
     int type = rand() % 7;
 
-    piece->x = 0;
-    piece->y = 0;
+    piece->position->x = 0;
+    piece->position->y = 0;
     piece->type = type;
     piece->rotation = 0;
     piece->format = &piece_formats[type];
@@ -135,23 +181,33 @@ piece_t *create_piece()
 
 void draw_piece(SDL_Renderer *renderer, piece_t *piece)
 {
-
-    
-    for(int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
-        for(int j = 0; j < 2; j++)
+        for (int j = 0; j < 4; j++)
         {
-            if (piece->format->points[i][j])
+            if (piece->format->tiles[i][j])
             {
-                draw_pixel(renderer, (piece->x + j) * PIXEL, (piece->y + i) * PIXEL, piece->format->color);
+                draw_pixel(renderer, (piece->position->x + j) * PIXEL, (piece->position->y + i) * PIXEL, piece->format->color);
             }
         }
     }
 }
 
-game_t *new_game()
+void rotate_piece(piece_t *piece, int direction)
 {
-    game_t *game = malloc(sizeof(game_t));
+    int old_orientation = piece->rotation;
+    int rotation_index = direction == 1 ? 0 : 1;
+    rotation_index = (rotation_index % ORIENTATIONS + ORIENTATIONS) % ORIENTATIONS;
+}
+
+game_t *new_game(game_t *game)
+{
+    if(game != NULL)
+    {
+        free(game);
+    } else {
+        game = malloc(sizeof(game_t));
+    }
 
     game->score = 0;
     game->piece_count = 1;
@@ -171,14 +227,14 @@ void draw_game(game_t *game, SDL_Renderer *renderer)
 
 void game_loop(game_t *game, SDL_Renderer *renderer)
 {
-    game->current_piece->y++;
+    game->current_piece->position->y++;
     draw_game(game, renderer);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    SDL_Window* window = NULL;
-    SDL_Renderer* renderer = NULL;
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
     SDL_Event event;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -194,10 +250,11 @@ int main(int argc, char** argv)
     unsigned int b = SDL_GetTicks();
     double delta = 0;
 
-    game_t *game = new_game();
+    game_t *game = new_game(NULL);
 
     while (running)
     {
+        int speed = 2;
         a = SDL_GetTicks();
         delta = a - b;
 
@@ -212,30 +269,40 @@ int main(int argc, char** argv)
         {
             switch (event.key.keysym.sym)
             {
-                case SDLK_ESCAPE:
-                    running = 0;
-                case SDLK_DOWN:
-                    // speed up
-                    break;
-                case SDLK_LEFT:
-                    game->current_piece->x--;
-                    draw_game(game, renderer);
-                    SDL_RenderPresent(renderer);
-                    break;
-                case SDLK_RIGHT:
-                    game->current_piece->x++;
-                    draw_game(game, renderer);
-                    SDL_RenderPresent(renderer);
-                    break;
-                case SDLK_UP:
-                    game->current_piece->rotation++;
-                    draw_game(game, renderer);
-                    SDL_RenderPresent(renderer);
-                    break;
+            case SDLK_ESCAPE:
+                running = 0;
+                free(game);
+                break;
+            case SDLK_DOWN:
+                speed = 60;
+                break;
+            case SDLK_LEFT:
+                game->current_piece->position->x--;
+                draw_game(game, renderer);
+                SDL_RenderPresent(renderer);
+                break;
+            case SDLK_RIGHT:
+                game->current_piece->position->x++;
+                draw_game(game, renderer);
+                SDL_RenderPresent(renderer);
+                break;
+            case SDLK_x:
+                rotate_piece(game->current_piece, CLOCKWISE);
+                draw_game(game, renderer);
+                SDL_RenderPresent(renderer);
+                break;
+            case SDLK_z:
+                rotate_piece(game->current_piece, COUNTER_CLOCKWISE);
+                draw_game(game, renderer);
+                SDL_RenderPresent(renderer);
+                break;
+            case SDLK_SPACE:
+                // drop
+                break;
             }
         }
 
-        if (delta > 1000 / 2)
+        if (delta > 1000 / speed)
         {
             b = a;
             game_loop(game, renderer);
@@ -250,41 +317,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
-
-
-// int main() {
-//     int size = 5;
-//     int *myArray = malloc(size * sizeof(int));
-
-//     // inicializa o vetor com valores
-//     for (int i = 0; i < size; i++) {
-//         myArray[i] = i + 1;
-//     }
-
-//     // imprime o vetor antes da remoção
-//     printf("Antes da remocao:\n");
-//     for (int i = 0; i < size; i++) {
-//         printf("%d ", myArray[i]);
-//     }
-//     printf("\n");
-
-//     int indexToRemove = 2; // índice do elemento a ser removido
-//     // realoca a memória para reduzir o tamanho do vetor
-//     size--;
-//     myArray = realloc(myArray, size * sizeof(int));
-//     // move os elementos para preencher o espaço deixado pelo elemento removido
-//     for (int i = indexToRemove; i < size; i++) {
-//         myArray[i] = myArray[i+1];
-//     }
-
-//     // imprime o vetor após a remoção
-//     printf("Depois da remocao:\n");
-//     for (int i = 0; i < size; i++) {
-//         printf("%d ", myArray[i]);
-//     }
-//     printf("\n");
-
-//     free(myArray);
-//     return 0;
-// }
